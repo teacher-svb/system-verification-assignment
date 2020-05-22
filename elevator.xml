@@ -4,14 +4,14 @@
 	<declaration>
 
 // constants and variable related to number of floors
-const int N = 6;         // # floors 
+const int N = 4;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
 const int E = 2;         // # elevators 
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
-int num_floors_per_elevator = (N + (E - 1)) / E;
+const id_f num_floors_per_elevator = (N + (E - 1)) / E;
 
 
 // cabin door channels and constants
@@ -34,7 +34,6 @@ chan start_sensors[id_e],stop_sensors[id_e],reach_floor[id_e];
 
 // button channels
 chan req[id_f];
-id_f picked_floor = 0;
 
 // communications between RequestHandler and MainControl
 chan go[id_e], served[id_e];
@@ -137,8 +136,6 @@ meta id_f target_floor;</declaration>
 id_f current_req;
 
 clock x;
-
-int bla = 0;
 
 
 // Before beginning with the assignment, you should take some time understand how a request is send from the button to the dummy request handler.
