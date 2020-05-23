@@ -11,6 +11,9 @@ const int E = 2;         // # elevators
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
+
+const int num_floors_per_elevator = (N + (E - 1)) / E;
+
 // cabin door channels and constants
 chan open_door[id_e], close_door[id_e], door_open[id_e], door_closed[id_e]; // channels for a door
 const int door_time = 2;     // time to open or close the door
@@ -133,9 +136,6 @@ meta id_f target_floor;</declaration>
 id_f current_req;
 
 clock x;
-
-
-const int num_floors_per_elevator = (N + (E - 1)) / E;
 
 
 // Before beginning with the assignment, you should take some time understand how a request is send from the button to the dummy request handler.
@@ -697,23 +697,30 @@ system cabin_door, protecting_door,engine, floor_sensors, button, fifo_RequestHa
 		<query>
 			<formula></formula>
 			<comment>/* All floor requests are eventually served, i.e., the elevator reaches its destination. */
-/* */</comment>
+
+/* Liveness property: something will eventually happen. */</comment>
 		</query>
 		<query>
-			<formula></formula>
+			<formula>E&lt;&gt;forall(f:int[1,N-1])(protecting_door(f,f/num_floors_per_elevator).open)</formula>
 			<comment>/* Each floor (except the ground floor) can be reached, and only by the correct elevator */
-/* I have no idea how to translate this */</comment>
+/* reachability property */
+
+A[](forall(f:id_f)(E&lt;&gt;(protecting_door(f,0).open or protecting_door(f,1).open)))</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size &amp;&amp; current_floor[0] == 0)</formula>
+			<formula>E&lt;&gt; (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size and current_floor[0] == 0)</formula>
 			<comment>/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
-/* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */</comment>
+/* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */
+
+/* Reachablility property */</comment>
 		</query>
 		<query>
-			<formula></formula>
+			<formula>A[] (dummy_MainControl(0).moving imply cabin_door(0).closed)</formula>
 			<comment>/* The elevator never travels with its door open. */
-/* There exists no path where the elevator is travelling and the elevator door is open */
-</comment>
+/* safety property: something bad will never happen */
+/* OR IN UPPAAL - something good is invariantly true */
+
+/* The elevator always travels with its door closed. */</comment>
 		</query>
 		<query>
 			<formula>A[] not deadlock</formula>

@@ -26,10 +26,28 @@
 
 /*
 \/* Each floor (except the ground floor) can be reached, and only by the correct elevator *\/
-\/* liveness property: something will eventually happen *\/
+\/* reachability property *\/
 
+
+E<>forall(f:int[1,N-1]) forall(e:id_e) (e == (f-1)\/num_floors_per_elevator imply protecting_door(f,e).open)
+
+E<> (0 == (1-1)\/num_floors_per_elevator imply protecting_door(1,0).open)
+E<> (1 == (1-1)\/num_floors_per_elevator imply protecting_door(1,1).open)
+
+E<> (0 == (2-1)\/num_floors_per_elevator imply protecting_door(2,0).open)
+E<> (1 == (2-1)\/num_floors_per_elevator imply protecting_door(2,1).open)
+
+E<> (0 == (3-1)\/num_floors_per_elevator imply protecting_door(3,0).open)
+E<> (1 == (3-1)\/num_floors_per_elevator imply protecting_door(3,1).open)
+
+E<> (0 == (4-1)\/num_floors_per_elevator imply protecting_door(4,0).open)
+E<> (1 == (4-1)\/num_floors_per_elevator imply protecting_door(4,1).open)
+
+E<> (0 == (5-1)\/num_floors_per_elevator imply protecting_door(5,0).open)
+E<> (1 == (5-1)\/num_floors_per_elevator imply protecting_door(5,1).open)
 */
-//NO_QUERY
+\
+E<>forall(f:int[1,N-1]) forall(e:id_e) (e == (f-1)/num_floors_per_elevator imply protecting_door(f,e).open)
 
 /*
 \/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. *\/
@@ -37,7 +55,7 @@
 
 \/* Reachablility property *\/
 */
-E<> (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size && current_floor[0] == 0)
+E<> (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size and current_floor[0] == 0)
 
 /*
 \/* The elevator never travels with its door open. *\/
