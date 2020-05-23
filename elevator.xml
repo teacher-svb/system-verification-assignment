@@ -7,7 +7,7 @@
 const int N = 6;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
-const int E = 2;         // # elevators  
+const int E = 3;         // # elevators  
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
@@ -164,7 +164,7 @@ int highest_floor = 0;
 
 void initialise() {
     lowest_floor = (num_floors_per_elevator * my_elevator) + 1;
-    highest_floor = (num_floors_per_elevator * my_elevator) + N - 1;
+    highest_floor = (num_floors_per_elevator * my_elevator) + num_floors_per_elevator + 1;
 }
 
 bool value_exists_in_queue(id_f element) {
@@ -187,16 +187,6 @@ bool value_exists_in_queue(id_f element) {
 // ignores all requests. 
 void enqueue(id_f element)
 {
-/*
-        int i = 0;
-        while (i &lt; len)
-        {
-                if (list[i] == element) {
-                    return;
-                }
-                i++;
-        }
-*/
         list[len++] = element;
 }
 
@@ -246,7 +236,8 @@ bool is_full ()
 }</declaration>
 		<location id="id7" x="-1453" y="-1555">
 			<name x="-1445" y="-1589">checking_input</name>
-			<label kind="invariant" x="-1436" y="-1572">is_req_for_lift(current_req)</label>
+			<label kind="invariant" x="-1436" y="-1572">is_req_for_lift(current_req) &amp;&amp; 
+!value_exists_in_queue(current_req)</label>
 			<committed/>
 		</location>
 		<location id="id8" x="-1827" y="-1436">
@@ -275,15 +266,14 @@ bool is_full ()
 		</location>
 		<init ref="id9"/>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id8"/>
-			<label kind="guard" x="-1759" y="-1462">value_exists_in_queue(current_req)</label>
-			<nail x="-1521" y="-1436"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-1581" y="-1521">x &gt;= max_wait</label>
+			<nail x="-1589" y="-1513"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-1445" y="-1411">!value_exists_in_queue(current_req)</label>
 			<label kind="assignment" x="-1445" y="-1394">enqueue(current_req)</label>
 		</transition>
 		<transition>
