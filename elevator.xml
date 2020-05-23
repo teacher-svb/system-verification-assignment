@@ -3,15 +3,15 @@
 <nta>
 	<declaration>
 
-// constants and variable related to number of floors
-const int N = 4;         // # floors 
+// constants and variable related to number of floors 
+const int N = 6;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
-const int E = 2;         // # elevators 
+const int E = 2;         // # elevators  
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
-const id_f num_floors_per_elevator = (N + (E - 1)) / E;
+const int num_floors_per_elevator = (N + (E - 1)) / E;
 
 
 // cabin door channels and constants
@@ -39,7 +39,7 @@ chan req[id_f];
 chan go[id_e], served[id_e];
 
 // Place global declarations here.
-int max_wait = 5; 
+int max_wait = 6; 
 
 // The current floor of the elevator:
 id_f current_floor[E]; 
@@ -159,6 +159,14 @@ id_f list[size];
 int[0,size] len = 0;
 
 
+int lowest_floor = 0;
+int highest_floor = 0;
+
+void initialise() {
+    lowest_floor = (num_floors_per_elevator * my_elevator) + 1;
+    highest_floor = (num_floors_per_elevator * my_elevator) + N - 1;
+}
+
 // Put an element at the end of the queue
 // Current allocation scheme is a FIFO
 // might not be the smartest scheme but it ensures
@@ -167,14 +175,18 @@ int[0,size] len = 0;
 // ignores all requests. 
 void enqueue(id_f element)
 {
+        int i = 0;
+        while (i &lt; len)
+        {
+                if (list[i] == element) {
+                    return;
+                }
+                i++;
+        }
         list[len++] = element;
 }
 
 bool is_req_for_lift(id_f element) {
-    int lowest_floor = (num_floors_per_elevator * my_elevator) + 1;
-    int highest_floor = (num_floors_per_elevator * my_elevator) + N;
-
-
     if (element &gt;= lowest_floor &amp;&amp; element &lt; highest_floor) {
         return true;
     }
@@ -239,7 +251,15 @@ bool is_full ()
 		<location id="id14" x="-1453" y="-1436">
 			<committed/>
 		</location>
-		<init ref="id9"/>
+		<location id="id15" x="-2218" y="-1657">
+			<committed/>
+		</location>
+		<init ref="id15"/>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id9"/>
+			<label kind="assignment" x="-2210" y="-1615">initialise()</label>
+		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id14"/>
@@ -321,24 +341,24 @@ x := 0</label>
 		<name>floor_sensors</name>
 		<parameter>id_e my_elevator</parameter>
 		<declaration>clock x;</declaration>
-		<location id="id15" x="32" y="-24">
+		<location id="id16" x="32" y="-24">
 			<name x="40" y="-72">moving</name>
 			<label kind="invariant" x="40" y="-56">x &lt;= floor_time</label>
 		</location>
-		<location id="id16" x="-200" y="-24">
+		<location id="id17" x="-200" y="-24">
 			<name x="-264" y="-16">idle</name>
 		</location>
-		<init ref="id16"/>
+		<init ref="id17"/>
 		<transition>
-			<source ref="id15"/>
-			<target ref="id16"/>
+			<source ref="id16"/>
+			<target ref="id17"/>
 			<label kind="synchronisation" x="-120" y="-112">stop_sensors[my_elevator]?</label>
 			<nail x="32" y="-88"/>
 			<nail x="-200" y="-88"/>
 		</transition>
 		<transition>
-			<source ref="id15"/>
-			<target ref="id15"/>
+			<source ref="id16"/>
+			<target ref="id16"/>
 			<label kind="guard" x="136" y="-24">x &gt;= floor_time</label>
 			<label kind="synchronisation" x="136" y="-8">reach_floor[my_elevator]!</label>
 			<label kind="assignment" x="136" y="8">x := 0</label>
@@ -346,8 +366,8 @@ x := 0</label>
 			<nail x="128" y="32"/>
 		</transition>
 		<transition>
-			<source ref="id16"/>
-			<target ref="id15"/>
+			<source ref="id17"/>
+			<target ref="id16"/>
 			<label kind="synchronisation" x="-178" y="-51">start_sensors[my_elevator]?</label>
 			<label kind="assignment" x="-104" y="-16">x := 0</label>
 		</transition>
@@ -356,60 +376,60 @@ x := 0</label>
 		<name>cabin_door</name>
 		<parameter>id_e my_elevator</parameter>
 		<declaration>clock x;</declaration>
-		<location id="id17" x="-280" y="40">
+		<location id="id18" x="-280" y="40">
 			<committed/>
 		</location>
-		<location id="id18" x="152" y="40">
+		<location id="id19" x="152" y="40">
 			<committed/>
 		</location>
-		<location id="id19" x="200" y="-232">
+		<location id="id20" x="200" y="-232">
 			<committed/>
 		</location>
-		<location id="id20" x="-280" y="-232">
+		<location id="id21" x="-280" y="-232">
 			<committed/>
 		</location>
-		<location id="id21" x="200" y="-88">
+		<location id="id22" x="200" y="-88">
 			<name x="216" y="-96">closed</name>
 		</location>
-		<location id="id22" x="-96" y="-88">
+		<location id="id23" x="-96" y="-88">
 			<name x="-80" y="-88">executing</name>
 			<label kind="invariant" x="-80" y="-104">x &lt;= door_time</label>
 		</location>
-		<location id="id23" x="-280" y="-88">
+		<location id="id24" x="-280" y="-88">
 			<name x="-328" y="-96">open</name>
 		</location>
-		<init ref="id21"/>
+		<init ref="id22"/>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id17"/>
+			<source ref="id23"/>
+			<target ref="id18"/>
 			<label kind="synchronisation" x="-416" y="59">pdoor_open[my_elevator][current_floor[my_elevator]]?</label>
 			<label kind="comments" x="-289" y="102">check if the protective door is open</label>
 			<nail x="-104" y="40"/>
 		</transition>
 		<transition>
-			<source ref="id18"/>
-			<target ref="id22"/>
+			<source ref="id19"/>
+			<target ref="id23"/>
 			<label kind="synchronisation" x="-56" y="48">open_pdoor[my_elevator][current_floor[my_elevator]]!</label>
 			<label kind="comments" x="-34" y="93">before opening, open the protective door first</label>
 			<nail x="-80" y="40"/>
 		</transition>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id19"/>
+			<source ref="id23"/>
+			<target ref="id20"/>
 			<label kind="synchronisation" x="-59" y="-263">pdoor_closed[my_elevator][current_floor[my_elevator]]?</label>
 			<label kind="comments" x="-62" y="-207">check if the protective door is closed</label>
 			<nail x="-80" y="-232"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id22"/>
+			<source ref="id21"/>
+			<target ref="id23"/>
 			<label kind="synchronisation" x="-442" y="-263">close_pdoor[my_elevator][current_floor[my_elevator]]!</label>
 			<label kind="comments" x="-357" y="-289">before closing, first close the protective door</label>
 			<nail x="-104" y="-232"/>
 		</transition>
 		<transition>
-			<source ref="id17"/>
-			<target ref="id23"/>
+			<source ref="id18"/>
+			<target ref="id24"/>
 			<label kind="guard" x="-392" y="-48">x &gt;= door_time</label>
 			<label kind="synchronisation" x="-450" y="-34">door_open[my_elevator]!</label>
 			<label kind="assignment" x="-392" y="-16">x := 0</label>
@@ -418,16 +438,16 @@ x := 0</label>
 			<nail x="-280" y="-48"/>
 		</transition>
 		<transition>
-			<source ref="id21"/>
-			<target ref="id18"/>
+			<source ref="id22"/>
+			<target ref="id19"/>
 			<label kind="synchronisation" x="204" y="-42">open_door[my_elevator]?</label>
 			<label kind="assignment" x="208" y="-16">x := 0</label>
 			<nail x="200" y="40"/>
 			<nail x="152" y="40"/>
 		</transition>
 		<transition>
-			<source ref="id19"/>
-			<target ref="id21"/>
+			<source ref="id20"/>
+			<target ref="id22"/>
 			<label kind="guard" x="208" y="-184">x &gt;= door_time</label>
 			<label kind="synchronisation" x="208" y="-168">door_closed[my_elevator]!</label>
 			<label kind="assignment" x="208" y="-152">x := 0</label>
@@ -436,8 +456,8 @@ x := 0</label>
 			<nail x="200" y="-144"/>
 		</transition>
 		<transition>
-			<source ref="id23"/>
-			<target ref="id20"/>
+			<source ref="id24"/>
+			<target ref="id21"/>
 			<label kind="synchronisation" x="-467" y="-187">close_door[my_elevator]?</label>
 			<label kind="assignment" x="-352" y="-168">x := 0</label>
 			<nail x="-280" y="-160"/>
@@ -448,123 +468,123 @@ x := 0</label>
 		<name>dummy_MainControl</name>
 		<parameter>id_e my_elevator</parameter>
 		<declaration>id_f dest_floor = 0; // the current destination</declaration>
-		<location id="id24" x="-1810" y="-1258">
+		<location id="id25" x="-1810" y="-1258">
 			<name x="-1929" y="-1275">elevator_waiting</name>
 		</location>
-		<location id="id25" x="-1479" y="-1258">
+		<location id="id26" x="-1479" y="-1258">
 			<name x="-1657" y="-1292">elevator_handling_request</name>
 			<committed/>
 		</location>
-		<location id="id26" x="-1088" y="-1258">
+		<location id="id27" x="-1088" y="-1258">
 			<name x="-1130" y="-1232">door_closing</name>
 		</location>
-		<location id="id27" x="-841" y="-1258">
+		<location id="id28" x="-841" y="-1258">
 			<name x="-875" y="-1241">door_is_closed</name>
 			<committed/>
 		</location>
-		<location id="id28" x="-569" y="-1258">
+		<location id="id29" x="-569" y="-1258">
 			<name x="-595" y="-1300">moving</name>
 		</location>
-		<location id="id29" x="-1071" y="-969">
+		<location id="id30" x="-1071" y="-969">
 			<name x="-1081" y="-1003">stopped</name>
 			<committed/>
 		</location>
-		<location id="id30" x="-1479" y="-969">
+		<location id="id31" x="-1479" y="-969">
 			<name x="-1470" y="-1003">opening_door</name>
 		</location>
-		<location id="id31" x="-1810" y="-969">
+		<location id="id32" x="-1810" y="-969">
 			<name x="-1912" y="-977">system_start</name>
 		</location>
-		<location id="id32" x="-1810" y="-1113">
+		<location id="id33" x="-1810" y="-1113">
 			<name x="-1989" y="-1122">initialising_opening_door</name>
 		</location>
-		<location id="id33" x="-212" y="-1258">
+		<location id="id34" x="-212" y="-1258">
 			<committed/>
 		</location>
-		<init ref="id31"/>
+		<init ref="id32"/>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id28"/>
+			<source ref="id34"/>
+			<target ref="id29"/>
 			<label kind="guard" x="-518" y="-1283">current_floor[my_elevator] != dest_floor</label>
 		</transition>
 		<transition>
-			<source ref="id32"/>
-			<target ref="id24"/>
+			<source ref="id33"/>
+			<target ref="id25"/>
 			<label kind="synchronisation" x="-1980" y="-1198">door_open[my_elevator]?</label>
 		</transition>
 		<transition>
-			<source ref="id31"/>
-			<target ref="id32"/>
+			<source ref="id32"/>
+			<target ref="id33"/>
 			<label kind="synchronisation" x="-1972" y="-1054">open_door[my_elevator]!</label>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id25"/>
+			<source ref="id31"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-1470" y="-1139">door_open[my_elevator]?</label>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id30"/>
+			<source ref="id30"/>
+			<target ref="id31"/>
 			<label kind="synchronisation" x="-1326" y="-960">open_door[my_elevator]!</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id29"/>
+			<source ref="id34"/>
+			<target ref="id30"/>
 			<label kind="guard" x="-926" y="-960">current_floor[my_elevator] == dest_floor</label>
 			<label kind="synchronisation" x="-926" y="-943">stop[my_elevator]!</label>
 			<nail x="-212" y="-969"/>
 		</transition>
 		<transition>
-			<source ref="id28"/>
-			<target ref="id33"/>
+			<source ref="id29"/>
+			<target ref="id34"/>
 			<label kind="guard" x="-518" y="-1164">current_floor[my_elevator] &gt; dest_floor</label>
 			<label kind="synchronisation" x="-518" y="-1147">reach_floor[my_elevator]?</label>
 			<label kind="assignment" x="-518" y="-1130">current_floor[my_elevator]--</label>
 			<nail x="-391" y="-1164"/>
 		</transition>
 		<transition>
-			<source ref="id27"/>
-			<target ref="id28"/>
+			<source ref="id28"/>
+			<target ref="id29"/>
 			<label kind="guard" x="-850" y="-1207">current_floor[my_elevator] &gt; dest_floor</label>
 			<label kind="synchronisation" x="-850" y="-1190">move_down[my_elevator]!</label>
 			<nail x="-714" y="-1215"/>
 		</transition>
 		<transition>
-			<source ref="id28"/>
-			<target ref="id33"/>
+			<source ref="id29"/>
+			<target ref="id34"/>
 			<label kind="guard" x="-501" y="-1411">current_floor[my_elevator] &lt; dest_floor</label>
 			<label kind="synchronisation" x="-501" y="-1394">reach_floor[my_elevator]?</label>
 			<label kind="assignment" x="-501" y="-1377">current_floor[my_elevator]++</label>
 			<nail x="-391" y="-1351"/>
 		</transition>
 		<transition>
-			<source ref="id27"/>
-			<target ref="id28"/>
+			<source ref="id28"/>
+			<target ref="id29"/>
 			<label kind="guard" x="-850" y="-1343">current_floor[my_elevator] &lt; dest_floor</label>
 			<label kind="synchronisation" x="-850" y="-1326">move_up[my_elevator]!</label>
 			<nail x="-714" y="-1300"/>
 		</transition>
 		<transition>
-			<source ref="id26"/>
-			<target ref="id27"/>
+			<source ref="id27"/>
+			<target ref="id28"/>
 			<label kind="synchronisation" x="-1054" y="-1258">door_closed[my_elevator]?</label>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id26"/>
+			<source ref="id26"/>
+			<target ref="id27"/>
 			<label kind="guard" x="-1394" y="-1258">current_floor[my_elevator] != dest_floor</label>
 			<label kind="synchronisation" x="-1394" y="-1241">close_door[my_elevator]!</label>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id25"/>
+			<source ref="id25"/>
+			<target ref="id26"/>
 			<label kind="synchronisation" x="-1734" y="-1249">go[my_elevator]?</label>
 			<label kind="assignment" x="-1734" y="-1224">dest_floor := target_floor,
 target_floor := 0</label>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id24"/>
+			<source ref="id26"/>
+			<target ref="id25"/>
 			<label kind="guard" x="-1759" y="-1410">current_floor[my_elevator] == dest_floor</label>
 			<label kind="synchronisation" x="-1759" y="-1394">served[my_elevator]!</label>
 			<nail x="-1479" y="-1419"/>
@@ -575,24 +595,24 @@ target_floor := 0</label>
 		<name>protecting_door</name>
 		<parameter>id_f i, id_e my_elevator</parameter>
 		<declaration>clock x;</declaration>
-		<location id="id34" x="-112" y="8">
+		<location id="id35" x="-112" y="8">
 			<name x="-144" y="24">executing_open</name>
 			<label kind="invariant" x="-144" y="40">x &lt;= door_time</label>
 		</location>
-		<location id="id35" x="40" y="-96">
+		<location id="id36" x="40" y="-96">
 			<name x="56" y="-104">closed</name>
 		</location>
-		<location id="id36" x="-112" y="-120">
+		<location id="id37" x="-112" y="-120">
 			<name x="-96" y="-120">executing</name>
 			<label kind="invariant" x="-144" y="-104">x &lt;= door_time</label>
 		</location>
-		<location id="id37" x="-232" y="-104">
+		<location id="id38" x="-232" y="-104">
 			<name x="-280" y="-112">open</name>
 		</location>
-		<init ref="id35"/>
+		<init ref="id36"/>
 		<transition>
-			<source ref="id34"/>
-			<target ref="id37"/>
+			<source ref="id35"/>
+			<target ref="id38"/>
 			<label kind="guard" x="-352" y="-80">x &gt;= door_time</label>
 			<label kind="synchronisation" x="-433" y="-68">pdoor_open[my_elevator][i]!</label>
 			<label kind="assignment" x="-352" y="-48">x := 0</label>
@@ -600,16 +620,16 @@ target_floor := 0</label>
 			<nail x="-232" y="-80"/>
 		</transition>
 		<transition>
-			<source ref="id35"/>
-			<target ref="id34"/>
+			<source ref="id36"/>
+			<target ref="id35"/>
 			<label kind="synchronisation" x="48" y="-64">open_pdoor[my_elevator][i]?</label>
 			<label kind="assignment" x="48" y="-32">x := 0</label>
 			<nail x="40" y="-32"/>
 			<nail x="40" y="8"/>
 		</transition>
 		<transition>
-			<source ref="id36"/>
-			<target ref="id35"/>
+			<source ref="id37"/>
+			<target ref="id36"/>
 			<label kind="guard" x="-88" y="-200">x &gt;= door_time</label>
 			<label kind="synchronisation" x="-88" y="-184">pdoor_closed[my_elevator][i]!</label>
 			<label kind="assignment" x="-88" y="-168">x := 0</label>
@@ -617,8 +637,8 @@ target_floor := 0</label>
 			<nail x="40" y="-152"/>
 		</transition>
 		<transition>
-			<source ref="id37"/>
-			<target ref="id36"/>
+			<source ref="id38"/>
+			<target ref="id37"/>
 			<label kind="synchronisation" x="-348" y="-187">close_pdoor[my_elevator][i]?</label>
 			<label kind="assignment" x="-200" y="-168">x := 0</label>
 			<nail x="-232" y="-152"/>
@@ -635,6 +655,42 @@ target_floor := 0</label>
 // List one or more processes to be composed into a system.
 system cabin_door, protecting_door,engine, floor_sensors, button, fifo_RequestHandler, dummy_MainControl;</system>
 	<queries>
+		<query>
+			<formula>/*
+The time needed to serve a request is bounded by the product of the distance in
+number of floors by the time needed to travel the distance of one floor plus twice the time it
+takes to open or close the door. More formally the property is defined as follows. Let p be
+the time to open or close the door. Let t be the time needed to cover the distance between two
+floors. Let s be the service time. Let d be the distance in number of floors. Then, the property
+is expressed as:
+s ≤ d · t + 2 · p
+*/</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>// Whenever a request is served, the passengers will be able to leave the cabin</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>// All floor requests are eventually served, i.e., the elevator reaches its destination.</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>// Each floor (except the ground floor) can be reached, and only by the correct elevator</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>// The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor.</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>The elevator never travels with its door open.</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>// The elevator control unit is deadlock-free.</formula>
+			<comment></comment>
+		</query>
 		<query>
 			<formula>A[] not deadlock
 			</formula>
