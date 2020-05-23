@@ -4,10 +4,10 @@
 	<declaration>
 
 // constants and variable related to number of floors 
-const int N = 6;         // # floors 
+const int N = 9;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
-const int E = 3;         // # elevators  
+const int E = 2;         // # elevators  
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
@@ -234,119 +234,129 @@ bool is_full ()
 {
 	return len == size;
 }</declaration>
-		<location id="id7" x="-1453" y="-1555">
-			<name x="-1445" y="-1589">checking_input</name>
-			<label kind="invariant" x="-1436" y="-1572">is_req_for_lift(current_req) &amp;&amp; 
+		<location id="id7" x="-1343" y="-1555">
+			<name x="-1335" y="-1589">checking_input</name>
+			<label kind="invariant" x="-1326" y="-1572">is_req_for_lift(current_req) &amp;&amp; 
 !value_exists_in_queue(current_req)</label>
 			<committed/>
 		</location>
-		<location id="id8" x="-1827" y="-1436">
-			<name x="-1904" y="-1419">getting_input</name>
+		<location id="id8" x="-2218" y="-1666">
+			<name x="-2228" y="-1700">initial_state</name>
+		</location>
+		<location id="id9" x="-2218" y="-1555">
+			<name x="-2414" y="-1564">arrived_at_final_destination</name>
+		</location>
+		<location id="id10" x="-2014" y="-1266">
+			<name x="-2024" y="-1300">processing_inputs</name>
 			<committed/>
 		</location>
-		<location id="id9" x="-2218" y="-1547">
-			<name x="-2228" y="-1581">initial_state</name>
+		<location id="id11" x="-2006" y="-1096">
+			<name x="-2048" y="-1079">arrived_at_floor</name>
 		</location>
-		<location id="id10" x="-2218" y="-1436">
-			<name x="-2414" y="-1445">arrived_at_final_destination</name>
+		<location id="id12" x="-1657" y="-1555">
+			<name x="-1657" y="-1606">awaiting_input</name>
+			<label kind="invariant" x="-1657" y="-1589">x &lt;= max_wait</label>
 		</location>
-		<location id="id11" x="-1827" y="-1266">
-			<name x="-1837" y="-1300">processing_inputs</name>
+		<location id="id13" x="-1564" y="-1266">
+			<name x="-1615" y="-1249">process_queue</name>
 			<committed/>
 		</location>
-		<location id="id12" x="-1819" y="-1096">
-			<name x="-1861" y="-1079">arrived_at_floor</name>
-		</location>
-		<location id="id13" x="-1827" y="-1555">
-			<name x="-1837" y="-1589">awaiting_input</name>
-		</location>
-		<location id="id14" x="-1453" y="-1266">
-			<name x="-1436" y="-1258">added_input_to_list</name>
+		<location id="id14" x="-1343" y="-1266">
+			<name x="-1385" y="-1249">enqueue_input</name>
 			<committed/>
 		</location>
-		<init ref="id9"/>
+		<init ref="id8"/>
 		<transition>
-			<source ref="id13"/>
+			<source ref="id7"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-1581" y="-1521">x &gt;= max_wait</label>
-			<nail x="-1589" y="-1513"/>
+			<label kind="guard" x="-1419" y="-1402">!is_empty()</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id14"/>
-			<label kind="assignment" x="-1445" y="-1394">enqueue(current_req)</label>
-		</transition>
-		<transition>
-			<source ref="id8"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-1819" y="-1513">!is_empty() &amp;&amp; !is_full()</label>
-		</transition>
-		<transition>
-			<source ref="id8"/>
-			<target ref="id13"/>
-			<label kind="guard" x="-1980" y="-1564">is_empty()</label>
-			<label kind="assignment" x="-1980" y="-1547">x := 0</label>
-			<nail x="-1912" y="-1555"/>
+			<label kind="guard" x="-1284" y="-1419">is_empty()</label>
+			<label kind="assignment" x="-1284" y="-1402">x := 0</label>
+			<nail x="-1292" y="-1411"/>
 		</transition>
 		<transition>
 			<source ref="id12"/>
-			<target ref="id11"/>
-			<label kind="synchronisation" x="-2006" y="-1096">served[my_elevator]?</label>
-			<label kind="assignment" x="-2006" y="-1079">x := 0</label>
-			<nail x="-1921" y="-1096"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-1581" y="-1487">x &gt;= max_wait &amp;&amp;
+!is_empty()</label>
+			<nail x="-1564" y="-1411"/>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="assignment" x="-1504" y="-1292">enqueue(current_req)</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-1853" y="-1666">x &gt;= max_wait &amp;&amp;
+is_empty()</label>
+			<label kind="assignment" x="-1853" y="-1624">x := 0</label>
+			<nail x="-1785" y="-1581"/>
+			<nail x="-1785" y="-1632"/>
 		</transition>
 		<transition>
 			<source ref="id11"/>
-			<target ref="id12"/>
-			<label kind="guard" x="-1708" y="-1096">!is_empty()</label>
-			<label kind="synchronisation" x="-1708" y="-1079">go[my_elevator]!</label>
-			<label kind="assignment" x="-1708" y="-1062">target_floor := front(),
-dequeue(),
-x := 0</label>
-			<nail x="-1691" y="-1096"/>
-		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id11"/>
-			<label kind="guard" x="-1606" y="-1258">is_full() || x &gt;= max_wait</label>
-			<label kind="assignment" x="-1606" y="-1241">x := 0</label>
-			<nail x="-1589" y="-1266"/>
-		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id8"/>
-			<label kind="guard" x="-1819" y="-1351">!is_full() &amp;&amp; x &lt; max_wait</label>
-			<nail x="-1632" y="-1343"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-2193" y="-1096">served[my_elevator]?</label>
+			<label kind="assignment" x="-2193" y="-1079">x := 0</label>
+			<nail x="-2108" y="-1096"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
-			<target ref="id8"/>
-			<label kind="synchronisation" x="-2091" y="-1428">served[my_elevator]?</label>
-			<label kind="assignment" x="-2091" y="-1411">x := 0</label>
+			<target ref="id11"/>
+			<label kind="guard" x="-1895" y="-1096">!is_empty()</label>
+			<label kind="synchronisation" x="-1895" y="-1079">go[my_elevator]!</label>
+			<label kind="assignment" x="-1895" y="-1062">target_floor := front(),
+dequeue(),
+x := 0</label>
+			<nail x="-1878" y="-1096"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-1793" y="-1258">is_full() || x &gt;= max_wait</label>
+			<label kind="assignment" x="-1793" y="-1241">x := 0</label>
+			<nail x="-1776" y="-1266"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-1793" y="-1377">!is_full() &amp;&amp; x &lt; max_wait</label>
+			<nail x="-1657" y="-1411"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
-			<target ref="id10"/>
-			<label kind="synchronisation" x="-2329" y="-1521">go[my_elevator]!</label>
-			<label kind="assignment" x="-2329" y="-1504">x := 0,
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-2125" y="-1547">served[my_elevator]?</label>
+			<label kind="assignment" x="-2125" y="-1530">x := 0</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-2329" y="-1640">go[my_elevator]!</label>
+			<label kind="assignment" x="-2329" y="-1623">x := 0,
 initialise()</label>
 		</transition>
 		<transition>
-			<source ref="id11"/>
-			<target ref="id10"/>
-			<label kind="guard" x="-2201" y="-1266">is_empty()</label>
-			<label kind="synchronisation" x="-2201" y="-1249">go[my_elevator]!</label>
-			<label kind="assignment" x="-2201" y="-1232">target_floor := 0,
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-2210" y="-1394">is_empty()</label>
+			<label kind="synchronisation" x="-2210" y="-1377">go[my_elevator]!</label>
+			<label kind="assignment" x="-2210" y="-1360">target_floor := 0,
 x := 0</label>
 			<nail x="-2218" y="-1266"/>
 		</transition>
 		<transition>
-			<source ref="id13"/>
+			<source ref="id12"/>
 			<target ref="id7"/>
-			<label kind="select" x="-1649" y="-1640">i : id_f</label>
-			<label kind="guard" x="-1649" y="-1623">!is_full() &amp;&amp; current_floor[my_elevator] == 0</label>
-			<label kind="synchronisation" x="-1649" y="-1606">req[i]?</label>
-			<label kind="assignment" x="-1649" y="-1589">current_req := i</label>
+			<label kind="select" x="-1521" y="-1615">i : id_f</label>
+			<label kind="synchronisation" x="-1521" y="-1598">req[i]?</label>
+			<label kind="assignment" x="-1521" y="-1581">current_req := i</label>
 		</transition>
 	</template>
 	<template>
