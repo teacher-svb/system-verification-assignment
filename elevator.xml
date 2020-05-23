@@ -4,14 +4,11 @@
 	<declaration>
 
 // constants and variable related to number of floors 
-const int N = 9;         // # floors 
+const int N = 6;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
 const int E = 2;         // # elevators  
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
-
-
-const int num_floors_per_elevator = (N + (E - 1)) / E;
 
 
 // cabin door channels and constants
@@ -138,6 +135,9 @@ id_f current_req;
 clock x;
 
 
+const int num_floors_per_elevator = (N + (E - 1)) / E;
+
+
 // Before beginning with the assignment, you should take some time understand how a request is send from the button to the dummy request handler.
 // This communication uses a parametrized channel "req". Basically, for each floor i there is a channel req[i].
 // Another way of providing communication makes use of global variables.
@@ -152,7 +152,7 @@ clock x;
 // This handler receives requests and stores them in a queue.
 // The following code defines this queue.
 // Size of the queue:
-const int size = 5; 
+const int size = 3; 
 
 // Local queue storing the requests.
 id_f list[size];
@@ -354,7 +354,8 @@ x := 0</label>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id7"/>
-			<label kind="select" x="-1521" y="-1615">i : id_f</label>
+			<label kind="select" x="-1521" y="-1632">i : id_f</label>
+			<label kind="guard" x="-1521" y="-1615">x &lt; max_wait</label>
 			<label kind="synchronisation" x="-1521" y="-1598">req[i]?</label>
 			<label kind="assignment" x="-1521" y="-1581">current_req := i</label>
 		</transition>
@@ -679,46 +680,44 @@ target_floor := 0</label>
 system cabin_door, protecting_door,engine, floor_sensors, button, fifo_RequestHandler, dummy_MainControl;</system>
 	<queries>
 		<query>
-			<formula>/* The time needed to serve a request is bounded by the product of the distance in 			*/
+			<formula></formula>
+			<comment>/* The time needed to serve a request is bounded by the product of the distance in 			*/
 /* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*/
 /* takes to open or close the door. More formally the property is defined as follows. Let p be 		*/
 /* the time to open or close the door. Let t be the time needed to cover the distance between two 	*/
 /* is expressed as: 											*/
 /* s ≤ d · t + 2 · p 											*/
-</formula>
-			<comment></comment>
+</comment>
 		</query>
 		<query>
-			<formula>/* Whenever a request is served, the passengers will be able to leave the cabin */
-/* Every node that contains a served request, is followed by an opening door node before another request is served. */</formula>
-			<comment></comment>
+			<formula></formula>
+			<comment>/* Whenever a request is served, the passengers will be able to leave the cabin */
+/* Every node that contains a served request, is followed by an opening door node before another request is served. */</comment>
 		</query>
 		<query>
-			<formula>/* All floor requests are eventually served, i.e., the elevator reaches its destination. */
-/* */</formula>
-			<comment></comment>
+			<formula></formula>
+			<comment>/* All floor requests are eventually served, i.e., the elevator reaches its destination. */
+/* */</comment>
 		</query>
 		<query>
-			<formula>/* Each floor (except the ground floor) can be reached, and only by the correct elevator */
-/* I have no idea how to translate this */</formula>
-			<comment></comment>
+			<formula></formula>
+			<comment>/* Each floor (except the ground floor) can be reached, and only by the correct elevator */
+/* I have no idea how to translate this */</comment>
 		</query>
 		<query>
-			<formula>/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
-/* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */</formula>
-			<comment></comment>
+			<formula>E&lt;&gt; (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size &amp;&amp; current_floor[0] == 0)</formula>
+			<comment>/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
+/* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */</comment>
 		</query>
 		<query>
-			<formula>/* The elevator never travels with its door open. */
+			<formula></formula>
+			<comment>/* The elevator never travels with its door open. */
 /* There exists no path where the elevator is travelling and the elevator door is open */
-</formula>
-			<comment></comment>
+</comment>
 		</query>
 		<query>
-			<formula>/* The elevator control unit is deadlock-free.*/
-A[] not deadlock</formula>
-			<comment>
-			</comment>
+			<formula>A[] not deadlock</formula>
+			<comment>/* The elevator control unit is deadlock-free.*/</comment>
 		</query>
 	</queries>
 </nta>
