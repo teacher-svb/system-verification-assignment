@@ -12,7 +12,7 @@ typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
 
-const int num_floors_per_elevator = (N + (E - 1)) / E;
+int num_floors_per_elevator = ((N-1) + (E - 1)) / E;
 
 // cabin door channels and constants
 chan open_door[id_e], close_door[id_e], door_open[id_e], door_closed[id_e]; // channels for a door
