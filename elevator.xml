@@ -12,7 +12,7 @@ typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
 
-const int num_floors_per_elevator = (N + (E - 1)) / E;
+int num_floors_per_elevator = (N + (E - 1)) / E;
 
 // cabin door channels and constants
 chan open_door[id_e], close_door[id_e], door_open[id_e], door_closed[id_e]; // channels for a door
@@ -129,7 +129,7 @@ meta id_f target_floor;</declaration>
 		</transition>
 	</template>
 	<template>
-		<name>fifo_RequestHandler</name>
+		<name>request_handler</name>
 		<parameter>id_e my_elevator</parameter>
 		<declaration>// The dummy request handler gets requests from the button.
 // When these are received, they are stored in the following local variable.
@@ -159,13 +159,8 @@ id_f list[size];
 int[0,size] len = 0;
 
 
-int lowest_floor = 0;
-int highest_floor = 0;
-
-void initialise() {
-    lowest_floor = (num_floors_per_elevator * my_elevator) + 1;
-    highest_floor = (num_floors_per_elevator * my_elevator) + num_floors_per_elevator + 1;
-}
+// some clocks for prop7. couldn't finish this in time
+// clock request_clocks[size];
 
 bool value_exists_in_queue(id_f element) {
         int i = 0;
@@ -191,11 +186,7 @@ void enqueue(id_f element)
 }
 
 bool is_req_for_lift(id_f element) {
-    if (element &gt;= lowest_floor &amp;&amp; element &lt; highest_floor) {
-        return true;
-    }
-
-    return false;
+    return my_elevator == (element-1)/num_floors_per_elevator;
 }
 
 // Remove the front element of the queue
@@ -233,7 +224,8 @@ bool is_empty ()
 bool is_full ()
 {
 	return len == size;
-}</declaration>
+}
+</declaration>
 		<location id="id7" x="-1343" y="-1555">
 			<name x="-1335" y="-1589">checking_input</name>
 			<label kind="invariant" x="-1326" y="-1572">is_req_for_lift(current_req) &amp;&amp; 
@@ -339,8 +331,7 @@ x := 0</label>
 			<source ref="id8"/>
 			<target ref="id9"/>
 			<label kind="synchronisation" x="-2329" y="-1640">go[my_elevator]!</label>
-			<label kind="assignment" x="-2329" y="-1623">x := 0,
-initialise()</label>
+			<label kind="assignment" x="-2329" y="-1623">x := 0</label>
 		</transition>
 		<transition>
 			<source ref="id10"/>
@@ -488,7 +479,7 @@ x := 0</label>
 		</transition>
 	</template>
 	<template>
-		<name>dummy_MainControl</name>
+		<name>main_control</name>
 		<parameter>id_e my_elevator</parameter>
 		<declaration>id_f dest_floor = 0; // the current destination</declaration>
 		<location id="id24" x="-1810" y="-1258">
@@ -677,11 +668,12 @@ target_floor := 0</label>
 
 
 // List one or more processes to be composed into a system.
-system cabin_door, protecting_door,engine, floor_sensors, button, fifo_RequestHandler, dummy_MainControl;</system>
+system cabin_door, protecting_door,engine, floor_sensors, button, request_handler, main_control;</system>
 	<queries>
 		<query>
-			<formula></formula>
-			<comment>/* The time needed to serve a request is bounded by the product of the distance in 			*/
+			<formula>sup: ()</formula>
+			<comment>PROP 7 -X-              --- 
+/* The time needed to serve a request is bounded by the product of the distance in 			*/
 /* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*/
 /* takes to open or close the door. More formally the property is defined as follows. Let p be 		*/
 /* the time to open or close the door. Let t be the time needed to cover the distance between two 	*/
@@ -690,33 +682,68 @@ system cabin_door, protecting_door,engine, floor_sensors, button, fifo_RequestHa
 </comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment>/* Whenever a request is served, the passengers will be able to leave the cabin */
+			<formula>A[] (main_control(0).elevator_waiting imply cabin_door(0).open)</formula>
+			<comment>PROP 6 -V- safety       --- 
+/* Whenever a request is served, the passengers will be able to leave the cabin */
 /* Every node that contains a served request, is followed by an opening door node before another request is served. */</comment>
 		</query>
 		<query>
-			<formula></formula>
-			<comment>/* All floor requests are eventually served, i.e., the elevator reaches its destination. */
+			<formula>(request_handler(0).enqueue_input &amp;&amp; request_handler(0).current_req == 1) --&gt; (main_control(0).stopped &amp;&amp; current_floor[0] == 1)
+
+/*
+and the same goes for each floor and matching elevator:
+
+(request_handler(0).enqueue_input &amp;&amp; request_handler(0).current_req == 2) --&gt; (main_control(0).stopped &amp;&amp; current_floor[0] == 2)
+ */</formula>
+			<comment>PROP 5 -V- liveness     --- 
+
+/* All floor requests are eventually served, i.e., the elevator reaches its destination. */
 
 /* Liveness property: something will eventually happen. */</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt;forall(f:int[1,N-1])(protecting_door(f,f/num_floors_per_elevator).open)</formula>
-			<comment>/* Each floor (except the ground floor) can be reached, and only by the correct elevator */
-/* reachability property */
+			<formula>A[] forall(f:int[1,N - 1]) forall(e:id_e) 
+(
+	(current_floor[e] == f &amp;&amp; main_control(e).stopped &amp;&amp; request_handler(e).is_req_for_lift(f))
+	|| 
+	(!request_handler(e).is_req_for_lift(f))
+	|| 
+	(request_handler(e).is_req_for_lift(f))
+)</formula>
+			<comment>PROP 4 -X-              --- 
 
-A[](forall(f:id_f)(E&lt;&gt;(protecting_door(f,0).open or protecting_door(f,1).open)))</comment>
+/* Each floor (except the ground floor) can be reached, and only by the correct elevator */
+
+2 full days of searching for this. Nothing....</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; (fifo_RequestHandler(0).len == fifo_RequestHandler(0).size and current_floor[0] == 0)</formula>
-			<comment>/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
+			<formula>E&lt;&gt; (request_handler(0).len == request_handler(0).size and current_floor[0] == 0)
+
+/*
+repeat for every lift:
+E&lt;&gt; (request_handler(1).len == request_handler(1).size and current_floor[1] == 0)
+...
+*/</formula>
+			<comment>PROP 3 -V- Reachability --- 
+
+/* IMPORTANT: because of the extra check of value_exists_in_queue() before acutally enqueueing, this ONLY works if the number of reachable floors &gt;= the size of the queue. */
+/* This means: for a config of 6floors/2lifts this will not work, as there are not enough floors per lift to fully populate a queue of length 5! */
+
+/* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
 /* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */
-
-/* Reachablility property */</comment>
+</comment>
 		</query>
 		<query>
-			<formula>A[] (dummy_MainControl(0).moving imply cabin_door(0).closed)</formula>
-			<comment>/* The elevator never travels with its door open. */
+			<formula>A[] (main_control(0).moving imply cabin_door(0).closed)
+
+/*
+repeat for every lift:
+A[] (main_control(1).moving imply cabin_door(1).closed)
+...
+*/</formula>
+			<comment>PROP 2 -V- safety       --- 
+
+/* The elevator never travels with its door open. */
 /* safety property: something bad will never happen */
 /* OR IN UPPAAL - something good is invariantly true */
 
@@ -724,7 +751,9 @@ A[](forall(f:id_f)(E&lt;&gt;(protecting_door(f,0).open or protecting_door(f,1).o
 		</query>
 		<query>
 			<formula>A[] not deadlock</formula>
-			<comment>/* The elevator control unit is deadlock-free.*/</comment>
+			<comment>PROP 1 -V- safety?      --- 
+
+/* The elevator control unit is deadlock-free.*/</comment>
 		</query>
 	</queries>
 </nta>
