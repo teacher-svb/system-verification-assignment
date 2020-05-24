@@ -137,6 +137,8 @@ id_f current_req;
 
 clock x;
 
+const int num_floors = num_floors_per_elevator;
+
 
 // Before beginning with the assignment, you should take some time understand how a request is send from the button to the dummy request handler.
 // This communication uses a parametrized channel "req". Basically, for each floor i there is a channel req[i].
@@ -152,7 +154,7 @@ clock x;
 // This handler receives requests and stores them in a queue.
 // The following code defines this queue.
 // Size of the queue:
-const int size = 3; 
+const int size = 5; 
 
 // Local queue storing the requests.
 id_f list[size];
@@ -682,10 +684,18 @@ system cabin_door, protecting_door,engine, floor_sensors, button, request_handle
 </comment>
 		</query>
 		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
 			<formula>A[] (main_control(0).elevator_waiting imply cabin_door(0).open)</formula>
 			<comment>PROP 6 -V- safety       --- 
 /* Whenever a request is served, the passengers will be able to leave the cabin */
 /* Every node that contains a served request, is followed by an opening door node before another request is served. */</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
 			<formula>(request_handler(0).enqueue_input &amp;&amp; request_handler(0).current_req == 1) --&gt; (main_control(0).stopped &amp;&amp; current_floor[0] == 1)
@@ -702,22 +712,37 @@ and the same goes for each floor and matching elevator:
 /* Liveness property: something will eventually happen. */</comment>
 		</query>
 		<query>
-			<formula>A[] forall(f:int[1,N - 1]) forall(e:id_e) 
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[]
 (
-	(current_floor[e] == f &amp;&amp; main_control(e).stopped &amp;&amp; request_handler(e).is_req_for_lift(f))
-	|| 
-	(!request_handler(e).is_req_for_lift(f))
-	|| 
-	(request_handler(e).is_req_for_lift(f))
+	forall(f:id_f)
+	(
+		(exists(e:id_e) (request_handler(e).is_req_for_lift(f)))
+		and
+		(target_floor == f imply exists(e:id_e)(request_handler(e).is_req_for_lift(f)))
+	)
 )</formula>
-			<comment>PROP 4 -X-              --- 
+			<comment>PROP 4 -V-              --- 
 
 /* Each floor (except the ground floor) can be reached, and only by the correct elevator */
 
-2 full days of searching for this. Nothing....</comment>
+2 full days of searching for this. Nothing....
+</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; (request_handler(0).len == request_handler(0).size and current_floor[0] == 0)
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; 
+(
+	request_handler(0).len == (request_handler(0).size &lt; num_floors_per_elevator ? request_handler(0).size : num_floors_per_elevator) 
+	and 
+	current_floor[0] == 0
+)
 
 /*
 repeat for every lift:
@@ -726,12 +751,16 @@ E&lt;&gt; (request_handler(1).len == request_handler(1).size and current_floor[1
 */</formula>
 			<comment>PROP 3 -V- Reachability --- 
 
-/* IMPORTANT: because of the extra check of value_exists_in_queue() before acutally enqueueing, this ONLY works if the number of reachable floors &gt;= the size of the queue. */
-/* This means: for a config of 6floors/2lifts this will not work, as there are not enough floors per lift to fully populate a queue of length 5! */
+/* IMPORTANT: because of the extra check of value_exists_in_queue() before acutally enqueueing, the threshold value can be smaller than 5!
+The actual threshold value is MIN(queue length, floor_per_elevator) */
 
 /* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
 /* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */
 </comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
 			<formula>A[] (main_control(0).moving imply cabin_door(0).closed)
@@ -748,6 +777,10 @@ A[] (main_control(1).moving imply cabin_door(1).closed)
 /* OR IN UPPAAL - something good is invariantly true */
 
 /* The elevator always travels with its door closed. */</comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
 		</query>
 		<query>
 			<formula>A[] not deadlock</formula>
