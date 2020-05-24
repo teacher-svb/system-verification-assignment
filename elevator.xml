@@ -734,6 +734,8 @@ A[] (main_control(1).elevator_waiting imply cabin_door(1).open)</formula>
 		(exists(e:id_e) (request_handler(e).is_req_for_lift(f)))
 		and
 		(target_floor == f imply exists(e:id_e)(request_handler(e).is_req_for_lift(f)))
+		or 
+		f == 0
 	)
 )</formula>
 			<comment>PROP 4 --- safety       --- 
@@ -750,8 +752,6 @@ A[] (main_control(1).elevator_waiting imply cabin_door(1).open)</formula>
 		<query>
 			<formula></formula>
 			<comment>PROP 3 --- Reachability --- 
-
-/* IMPORTANT: because of the extra check of value_exists_in_queue() before acutally enqueueing, this is not valid for model where the number of floors per elevator are fewer than 5. */
 
 /* The amount of requests can reach the threshold value (in the description of Task 1 the value is 5) when the elevator is on the ground floor. */
 /* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 */

@@ -679,7 +679,10 @@ system cabin_door, protecting_door,engine, floor_sensors, button, request_handle
 /* the time to open or close the door. Let t be the time needed to cover the distance between two 	*/
 /* is expressed as: 											*/
 /* s ≤ d · t + 2 · p 											*/
-</comment>
+
+ - create a clock for each request in the queue
+ - figure out how the sup() thing is supposed to work - documentation is very limited
+ - use sup() to figure out what the max value of all these clocks were, and compare that value to the given formula</comment>
 		</query>
 		<query>
 			<formula></formula>
