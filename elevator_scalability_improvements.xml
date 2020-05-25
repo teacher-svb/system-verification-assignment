@@ -4,10 +4,10 @@
 	<declaration>
 
 // constants and variable related to number of floors 
-const int N = 6;         // # floors 
+const int N = 9;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
-const int E = 2;         // # elevators  
+const int E = 2;         // # elevators
 typedef int[0,E-1] id_e; // elevator id from 0 to N-1
 
 
