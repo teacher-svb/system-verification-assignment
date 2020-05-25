@@ -4,7 +4,7 @@
 	<declaration>
 
 // constants and variable related to number of floors 
-const int N = 3;         // # floors 
+const int N = 5;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
 const int E = 2;         // # elevators  
@@ -175,7 +175,7 @@ void enqueue(id_f element)
 }
 
 bool is_req_for_lift(id_f element) {
-    return my_elevator == (element-1)/num_floors_per_elevator;
+    return element != 0 &amp;&amp; my_elevator == (element-1)/num_floors_per_elevator;
 }
 
 // Remove the front element of the queue
@@ -224,7 +224,7 @@ bool is_full ()
 			<name x="-2228" y="-1700">initial_state</name>
 		</location>
 		<location id="id9" x="-2218" y="-1555">
-			<name x="-2414" y="-1564">arrived_at_final_destination</name>
+			<name x="-2337" y="-1564">back_at_floor0</name>
 		</location>
 		<location id="id10" x="-2014" y="-1266">
 			<name x="-2024" y="-1300">processing_inputs</name>
@@ -482,7 +482,7 @@ x := 0</label>
 			<name x="-1912" y="-977">system_start</name>
 		</location>
 		<location id="id31" x="-1810" y="-1113">
-			<name x="-1989" y="-1122">initialising_opening_door</name>
+			<name x="-1972" y="-1122">opening_door_at_start</name>
 		</location>
 		<location id="id32" x="-212" y="-1258">
 			<name x="-222" y="-1292">checking_floor</name>

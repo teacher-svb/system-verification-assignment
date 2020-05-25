@@ -4,7 +4,7 @@
 	<declaration>
 
 // constants and variable related to number of floors 
-const int N = 3;         // # floors 
+const int N = 6;         // # floors 
 typedef int[0,N-1] id_f; // floor id from 0 to N-1
 
 const int E = 2;         // # elevators  
@@ -162,6 +162,7 @@ int[0,size] len = 0;
 // some clocks for prop7. couldn't finish this in time
 // clock request_clocks[size];
 
+// check to see if a given element is already queued
 bool value_exists_in_queue(id_f element) {
         int i = 0;
         while (i &lt; len)
@@ -174,6 +175,25 @@ bool value_exists_in_queue(id_f element) {
         return false;
 }
 
+// Function to sort the queue using insertion sort
+void sortQueue() {  
+    int i = 1;
+    int j = 0;  
+    int k = 0;
+    while (i &lt; len) 
+    {
+        k = list[i];  
+        j = i - 1;  
+        while (j &gt;= 0 &amp;&amp; list[j] &gt; k) 
+        {  
+            list[j + 1] = list[j];  
+            j = j - 1;  
+        }  
+        list[j + 1] = k;  
+        i++;
+    }  
+}  
+
 // Put an element at the end of the queue
 // Current allocation scheme is a FIFO
 // might not be the smartest scheme but it ensures
@@ -185,8 +205,11 @@ void enqueue(id_f element)
         list[len++] = element;
 }
 
+// check if a given floor/request is appropriate for this floor.
+// floor 0 can be rejected
+// all other floors are evenly shared among elevators.
 bool is_req_for_lift(id_f element) {
-    return my_elevator == (element-1)/num_floors_per_elevator;
+    return element != 0 &amp;&amp; my_elevator == (element-1)/num_floors_per_elevator;
 }
 
 // Remove the front element of the queue
@@ -230,13 +253,17 @@ bool is_full ()
 			<name x="-1335" y="-1589">checking_input</name>
 			<label kind="invariant" x="-1326" y="-1572">is_req_for_lift(current_req) &amp;&amp; 
 !value_exists_in_queue(current_req)</label>
+			<label kind="comments" x="-1224" y="-1657">Also check if the value
+already exists in the queue.
+If so, the value should not be
+added (again).</label>
 			<committed/>
 		</location>
 		<location id="id8" x="-2218" y="-1666">
 			<name x="-2228" y="-1700">initial_state</name>
 		</location>
 		<location id="id9" x="-2218" y="-1555">
-			<name x="-2414" y="-1564">arrived_at_final_destination</name>
+			<name x="-2388" y="-1564">arrived_at_ground_floor</name>
 		</location>
 		<location id="id10" x="-2014" y="-1266">
 			<name x="-2024" y="-1300">processing_inputs</name>
@@ -312,7 +339,12 @@ x := 0</label>
 			<source ref="id13"/>
 			<target ref="id10"/>
 			<label kind="guard" x="-1793" y="-1258">is_full() || x &gt;= max_wait</label>
-			<label kind="assignment" x="-1793" y="-1241">x := 0</label>
+			<label kind="assignment" x="-1793" y="-1241">sortQueue(),
+x := 0</label>
+			<label kind="comments" x="-1785" y="-1198">added a sortQueue() call here,
+so when the elevator leaves to
+serve the requests, the queue 
+is sorted first.</label>
 			<nail x="-1776" y="-1266"/>
 		</transition>
 		<transition>
