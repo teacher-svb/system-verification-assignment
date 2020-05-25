@@ -6,12 +6,35 @@ PROP 7 -X-              ---
 \/* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*\/
 \/* takes to open or close the door. More formally the property is defined as follows. Let p be 		*\/
 \/* the time to open or close the door. Let t be the time needed to cover the distance between two 	*\/
+\/* floors. Let s be the service time. Let d be the distance in number of floors. Then, the property     *\/
 \/* is expressed as: 											*\/
 \/* s \u2264 d \u00b7 t + 2 \u00b7 p 											*\/
 
- - create a clock for each request in the queue
- - figure out how the sup() thing is supposed to work - documentation is very limited
- - use sup() to figure out what the max value of all these clocks were, and compare that value to the given formula
+e.g.
+
+1: request floor 2
+2: request floor 3
+3: request floor 1
+4: deuren toe
+5: lift beweegt
+6: deuren open
+7: request floor 2 served
+8: deuren toe
+9: lift beweegt
+10: deuren open
+11: request floor 3 served
+12: deuren toe
+13: lift beweegt
+14: lift beweegt
+15: deuren open
+16: request floor 1 served
+17: deuren toe
+...
+
+t en p kan je opmaken uit je model
+clock wordt reset\/gestart op 4, 8, 12, ..., sla hier d op als: abs(eindvloer - startvloer)
+clock wordt gestopt op 7, 11, 16, ..., sla hier de waarde van de clock op in s
+
 */
 //NO_QUERY
 
@@ -72,30 +95,6 @@ PROP 5 --- liveness     ---
 
 
 /*
- - PROP 5 - floor 3
-*/
-/*floor 3 gets elevator 0 */\
-\
-(request_handler(0).enqueue_input && request_handler(0).current_req == 3) --> (main_control(0).stopped && current_floor[0] == 3)\
-
-
-/*
- - PROP 5 - floor 4
-*/
-/*floor 4 gets elevator 1 */\
-\
-(request_handler(1).enqueue_input && request_handler(1).current_req == 4) --> (main_control(1).stopped && current_floor[1] == 4)\
-
-
-/*
- - PROP 5 - floor 5
-*/
-/*floor 5 gets elevator 1 */\
-\
-(request_handler(1).enqueue_input && request_handler(1).current_req == 5) --> (main_control(1).stopped && current_floor[1] == 5)\
-
-
-/*
 
 */
 //NO_QUERY
@@ -103,27 +102,78 @@ PROP 5 --- liveness     ---
 /*
 PROP 4 --- safety       --- 
 
+\/* IMPORTANT: this property will no longer work due to scalability improvements. This is due to how is_req_for_lift has changed: the comparison calculations have been moved to an initialisation function that is called at the start of the request_handler model. This means that at the early beginnings, before any requests can be made, is_req_for_lift won't work, breaking this propertys code. *\/
+
 \/* Each floor (except the ground floor) can be reached, and only by the correct elevator *\/
 
 \/* The two most horrible days of these past few weeks were spent looking for this. *\/
 
+with forall\/exists:
+
+A[]
+(
+	forall(f:id_f)
+	(
+		(
+			(exists(e:id_e) (request_handler(e).is_req_for_lift(f)))
+			and
+			(target_floor == f imply exists(e:id_e)(request_handler(e).is_req_for_lift(f)))
+		)
+		or
+		f == 0
+	)
+)
 */
+/* IMPORTANT: this property will no longer work due to scalability improvements. (see comments for more details) */\
+\
 A[]\
 (\
-	forall(f:id_f)\
 	(\
-		(exists(e:id_e) (request_handler(e).is_req_for_lift(f)))\
-		and\
-		(target_floor == f imply exists(e:id_e)(request_handler(e).is_req_for_lift(f)))\
-		or\
-		f == 0\
+		(\
+			(request_handler(0).is_req_for_lift(1))\
+			and\
+			(target_floor == 1 imply ((request_handler(0).is_req_for_lift(1)) and (!request_handler(1).is_req_for_lift(1))))\
+		)\
+	)\
+	and\
+	(\
+		(\
+			(request_handler(1).is_req_for_lift(2))\
+			and\
+			(target_floor == 2 imply ((request_handler(1).is_req_for_lift(2)) and (!request_handler(0).is_req_for_lift(2))))\
+		)\
 	)\
 )
 
 /*
 
 */
-//NO_QUERY
+A[]\
+(\
+	(\
+		(\
+			((request_handler(0).is_req_for_lift(1)) or (request_handler(1).is_req_for_lift(1)))\
+			and\
+			(target_floor == 1 imply ((request_handler(0).is_req_for_lift(1)) or (request_handler(1).is_req_for_lift(1))))\
+		)\
+	)\
+	and\
+	(\
+		(\
+			((request_handler(0).is_req_for_lift(2)) or (request_handler(1).is_req_for_lift(2)))\
+			and\
+			(target_floor == 2 imply ((request_handler(0).is_req_for_lift(2)) or (request_handler(1).is_req_for_lift(2))))\
+		)\
+	)\
+	and\
+	(\
+		(\
+			((request_handler(0).is_req_for_lift(3)) or (request_handler(1).is_req_for_lift(3)))\
+			and\
+			(target_floor == 3 imply ((request_handler(0).is_req_for_lift(3)) or (request_handler(1).is_req_for_lift(3))))\
+		)\
+	)\
+)
 
 /*
 PROP 3 --- Reachability --- 
@@ -134,7 +184,9 @@ PROP 3 --- Reachability ---
 \/* There exists a path where the elevator is on the ground floor and the amount of requests equals 5 *\/
 
 */
-//NO_QUERY
+/* IMPORTANT: this property will no longer work due to scalability improvements. (see comments for more details) */\
+\
+
 
 /*
  - PROP 3 - elevator 0
