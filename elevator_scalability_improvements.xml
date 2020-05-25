@@ -162,6 +162,16 @@ int[0,size] len = 0;
 // some clocks for prop7. couldn't finish this in time
 // clock request_clocks[size];
 
+int min_floor = 0;
+int max_floor = 0;
+
+void initialise() {
+   min_floor = (my_elevator * num_floors_per_elevator) + 1;
+   max_floor = ((my_elevator + 1) * num_floors_per_elevator) + 1;
+
+    min_floor = min_floor &lt; 1 ? 1 : min_floor;
+}
+
 // check to see if a given element is already queued
 bool value_exists_in_queue(id_f element) {
         int i = 0;
@@ -209,7 +219,10 @@ void enqueue(id_f element)
 // floor 0 can be rejected
 // all other floors are evenly shared among elevators.
 bool is_req_for_lift(id_f element) {
-    return element != 0 &amp;&amp; my_elevator == (element-1)/num_floors_per_elevator;
+    return element &gt;= min_floor &amp;&amp; element &lt; max_floor;
+
+    // old way to calculate is_req_for_lift (4 operations vs 2 operations)
+    // return element != 0 &amp;&amp; my_elevator == (element-1)/num_floors_per_elevator;
 }
 
 // Remove the front element of the queue
@@ -363,7 +376,8 @@ is sorted first.</label>
 			<source ref="id8"/>
 			<target ref="id9"/>
 			<label kind="synchronisation" x="-2329" y="-1640">go[my_elevator]!</label>
-			<label kind="assignment" x="-2329" y="-1623">x := 0</label>
+			<label kind="assignment" x="-2329" y="-1623">x := 0,
+initialise()</label>
 		</transition>
 		<transition>
 			<source ref="id10"/>
