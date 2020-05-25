@@ -160,7 +160,6 @@ int[0,size] len = 0;
 
 
 // a clock for prop7. couldn't finish this in time
-clock request_timer;
 int request_distance;
 int request_single_floor_time = 2;
 int request_door_time = 2;
@@ -232,8 +231,8 @@ bool is_full ()
 			<name x="-2024" y="-1300">processing_inputs</name>
 			<committed/>
 		</location>
-		<location id="id11" x="-2006" y="-1096">
-			<name x="-2048" y="-1079">arrived_at_floor</name>
+		<location id="id11" x="-2057" y="-1096">
+			<name x="-2099" y="-1079">arrived_at_floor</name>
 		</location>
 		<location id="id12" x="-1657" y="-1555">
 			<name x="-1657" y="-1606">awaiting_input</name>
@@ -252,29 +251,25 @@ bool is_full ()
 			<source ref="id7"/>
 			<target ref="id14"/>
 			<label kind="guard" x="-1249" y="-1419">is_empty()</label>
-			<label kind="assignment" x="-1249" y="-1402">x := 0,
-request_timer := 0</label>
+			<label kind="assignment" x="-1249" y="-1402">x := 0</label>
 			<nail x="-1258" y="-1402"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id14"/>
 			<label kind="guard" x="-1419" y="-1402">!is_empty()</label>
-			<label kind="assignment" x="-1462" y="-1385">request_timer := 0</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
 			<target ref="id13"/>
 			<label kind="guard" x="-1581" y="-1487">x &gt;= max_wait &amp;&amp;
 !is_empty()</label>
-			<label kind="assignment" x="-1572" y="-1453">request_timer := 0</label>
 			<nail x="-1564" y="-1411"/>
 		</transition>
 		<transition>
 			<source ref="id14"/>
 			<target ref="id13"/>
-			<label kind="assignment" x="-1521" y="-1309">enqueue(current_req),
-request_timer := 0</label>
+			<label kind="assignment" x="-1521" y="-1309">enqueue(current_req)</label>
 		</transition>
 		<transition>
 			<source ref="id12"/>
@@ -289,8 +284,7 @@ is_empty()</label>
 			<source ref="id11"/>
 			<target ref="id10"/>
 			<label kind="synchronisation" x="-2235" y="-1181">served[my_elevator]?</label>
-			<label kind="assignment" x="-2235" y="-1164">x := 0,
-request_timer := 0</label>
+			<label kind="assignment" x="-2235" y="-1164">x := 0</label>
 			<nail x="-2108" y="-1096"/>
 		</transition>
 		<transition>
@@ -299,9 +293,8 @@ request_timer := 0</label>
 			<label kind="guard" x="-1895" y="-1096">!is_empty()</label>
 			<label kind="synchronisation" x="-1895" y="-1079">go[my_elevator]!</label>
 			<label kind="assignment" x="-1895" y="-1062">target_floor := front(),
-request_distance := abs(current_floor[my_elevator] - last()),
-dequeue(),
-x := 0</label>
+request_distance := abs(current_floor[my_elevator] - front()),
+dequeue()</label>
 			<nail x="-1878" y="-1096"/>
 		</transition>
 		<transition>
@@ -316,15 +309,13 @@ request_timer := 0</label>
 			<source ref="id13"/>
 			<target ref="id12"/>
 			<label kind="guard" x="-1793" y="-1377">!is_full() &amp;&amp; x &lt; max_wait</label>
-			<label kind="assignment" x="-1751" y="-1360">request_timer := 0</label>
 			<nail x="-1657" y="-1411"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id12"/>
 			<label kind="synchronisation" x="-2125" y="-1547">served[my_elevator]?</label>
-			<label kind="assignment" x="-2125" y="-1530">x := 0,
-request_timer := 0</label>
+			<label kind="assignment" x="-2125" y="-1530">x := 0</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
@@ -338,7 +329,8 @@ request_timer := 0</label>
 			<label kind="guard" x="-2210" y="-1394">is_empty()</label>
 			<label kind="synchronisation" x="-2210" y="-1377">go[my_elevator]!</label>
 			<label kind="assignment" x="-2210" y="-1360">target_floor := 0,
-x := 0</label>
+x := 0,
+request_timer := 0</label>
 			<nail x="-2218" y="-1266"/>
 		</transition>
 		<transition>
@@ -347,8 +339,7 @@ x := 0</label>
 			<label kind="select" x="-1521" y="-1657">i : id_f</label>
 			<label kind="guard" x="-1521" y="-1640">x &lt; max_wait</label>
 			<label kind="synchronisation" x="-1521" y="-1623">req[i]?</label>
-			<label kind="assignment" x="-1521" y="-1606">current_req := i,
-request_timer := 0</label>
+			<label kind="assignment" x="-1521" y="-1606">current_req := i</label>
 		</transition>
 	</template>
 	<template>
@@ -671,7 +662,7 @@ target_floor := 0</label>
 system cabin_door, protecting_door,engine, floor_sensors, button, request_handler, main_control;</system>
 	<queries>
 		<query>
-			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).request_timer &lt;= (request_handler(0).request_distance * request_handler(0).request_single_floor_time + 2 * request_handler(0).request_door_time)))</formula>
+			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).x &lt;= (request_handler(0).request_distance * request_handler(0).request_single_floor_time + 2 * request_handler(0).request_door_time)))</formula>
 			<comment>PROP 7 -X-              --- 
 /* The time needed to serve a request is bounded by the product of the distance in 			*/
 /* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*/
