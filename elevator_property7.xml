@@ -19,6 +19,8 @@ chan open_door[id_e], close_door[id_e], door_open[id_e], door_closed[id_e]; // c
 const int door_time = 2;     // time to open or close the door
 
 
+int request_single_floor_time = 2;
+int request_door_time = 2;
 
 // protecting door channels and constants
 chan open_pdoor[id_e][id_f], close_pdoor[id_e][id_f], pdoor_open[id_e][id_f], pdoor_closed[id_e][id_f]; // channels for a door
@@ -160,9 +162,7 @@ int[0,size] len = 0;
 
 
 // a clock for prop7. couldn't finish this in time
-int request_distance;
-int request_single_floor_time = 2;
-int request_door_time = 2;
+int request_distance = 1;
 
 
 // Put an element at the end of the queue
@@ -301,8 +301,7 @@ dequeue()</label>
 			<source ref="id13"/>
 			<target ref="id10"/>
 			<label kind="guard" x="-1793" y="-1258">is_full() || x &gt;= max_wait</label>
-			<label kind="assignment" x="-1793" y="-1241">x := 0,
-request_timer := 0</label>
+			<label kind="assignment" x="-1793" y="-1241">x := 0</label>
 			<nail x="-1776" y="-1266"/>
 		</transition>
 		<transition>
@@ -329,8 +328,7 @@ request_timer := 0</label>
 			<label kind="guard" x="-2210" y="-1394">is_empty()</label>
 			<label kind="synchronisation" x="-2210" y="-1377">go[my_elevator]!</label>
 			<label kind="assignment" x="-2210" y="-1360">target_floor := 0,
-x := 0,
-request_timer := 0</label>
+x := 0</label>
 			<nail x="-2218" y="-1266"/>
 		</transition>
 		<transition>
@@ -662,7 +660,7 @@ target_floor := 0</label>
 system cabin_door, protecting_door,engine, floor_sensors, button, request_handler, main_control;</system>
 	<queries>
 		<query>
-			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).x &lt;= (request_handler(0).request_distance * request_handler(0).request_single_floor_time + 2 * request_handler(0).request_door_time)))</formula>
+			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).x &lt;= (request_handler(0).request_distance * request_single_floor_time + 2 * request_door_time)))</formula>
 			<comment>PROP 7 -X-              --- 
 /* The time needed to serve a request is bounded by the product of the distance in 			*/
 /* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*/
