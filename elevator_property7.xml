@@ -19,8 +19,6 @@ chan open_door[id_e], close_door[id_e], door_open[id_e], door_closed[id_e]; // c
 const int door_time = 2;     // time to open or close the door
 
 
-int request_single_floor_time = 2;
-int request_door_time = 2;
 
 // protecting door channels and constants
 chan open_pdoor[id_e][id_f], close_pdoor[id_e][id_f], pdoor_open[id_e][id_f], pdoor_closed[id_e][id_f]; // channels for a door
@@ -660,7 +658,7 @@ target_floor := 0</label>
 system cabin_door, protecting_door,engine, floor_sensors, button, request_handler, main_control;</system>
 	<queries>
 		<query>
-			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).x &lt;= (request_handler(0).request_distance * request_single_floor_time + 2 * request_door_time)))</formula>
+			<formula>A[] (request_handler(0).arrived_at_floor imply (request_handler(0).x &lt;= (request_handler(0).request_distance * floor_time + 2 * door_time)))</formula>
 			<comment>PROP 7 -X-              --- 
 /* The time needed to serve a request is bounded by the product of the distance in 			*/
 /* number of floors by the time needed to travel the distance of one floor plus twice the time it 	*/
